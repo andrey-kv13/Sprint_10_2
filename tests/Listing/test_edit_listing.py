@@ -1,7 +1,8 @@
 import allure
 from helpers.listing_generator import ListingGenerator
 from helpers.api_client import ApiClient
-from config.error_messages import AssertMessages
+from data.error_messages import AssertMessages
+from data.response_messages import ErrorResponseMessages
 
 
 class TestEditListing:
@@ -23,10 +24,9 @@ class TestEditListing:
         
         with allure.step("Проверить статус код ответа"):
             assert response.status_code == 200, (
-                AssertMessages.STATUS_CODE_MISMATCH.format(expected=200, actual=response.status_code) +
-                f" Response: {response.text}"
+                AssertMessages.STATUS_CODE_MISMATCH.format(expected=200, actual=response.status_code)
+                + f" Response: {response.text}"
             )
-        
         with allure.step("Проверить, что цена объявления изменилась"):
             new_price = response.json()['price']
             assert created_listing["original_price"] != new_price, (
@@ -58,21 +58,32 @@ class TestEditListing:
         
         with allure.step("Проверить статус код ответа"):
             assert response.status_code == 401, (
-                AssertMessages.STATUS_CODE_MISMATCH.format(expected=401, actual=response.status_code) +
-                f" Response: {response.text}"
+                AssertMessages.STATUS_CODE_MISMATCH.format(expected=401, actual=response.status_code)
+                + f" Response: {response.text}"
+            )
+        with allure.step("Проверить тело ответа"):
+            response_data = response.json()
+            # API возвращает поле 'messege' вместо 'message' (опечатка в API)
+            assert response_data.get('messege') == ErrorResponseMessages.TOKEN_INVALID, (
+                AssertMessages.FIELD_VALUE_MISMATCH.format(
+                    field_name='messege',
+                    expected=ErrorResponseMessages.TOKEN_INVALID,
+                    actual=response_data.get('messege')
+                )
             )
     
     @allure.epic("Listing API")
     @allure.feature("Редактирование объявления")
     @allure.title("Редактирование объявления: негативный кейс (чужое объявление)")
     @allure.description("Тест проверяет ошибку при редактировании чужого объявления")
-    def test_edit_listing_by_another_user(self, created_listing, another_user_headers):
+    def test_edit_listing_by_another_user(self, created_listing, register_new_user):
         with allure.step("Подготовить данные для обновления"):
+            _, another_headers = register_new_user
             updated_payload = ListingGenerator.generate_listing_data(price='2000')
         
         with allure.step("Отправить запрос на редактирование чужого объявления"):
             response = ApiClient.patch_request_update_listing(
-                another_user_headers,
+                another_headers,
                 created_listing["listing_id"],
                 updated_payload
             )
@@ -83,7 +94,10 @@ class TestEditListing:
                 f" Response: {response.text}"
             )
         with allure.step("Проверить текст сообщения об ошибке"):
-            expected_message = "Оффер не найден или у вас нет прав на его редактирование"
-            assert response.json()['message'] == expected_message, (
-                AssertMessages.ERROR_MESSAGE_MISMATCH.format(expected=expected_message, actual=response.json()['message'])
+            assert response.json()['message'] == ErrorResponseMessages.LISTING_NOT_FOUND_OR_NO_PERMISSION, (
+                AssertMessages.FIELD_VALUE_MISMATCH.format(
+                    field_name='message',
+                    expected=ErrorResponseMessages.LISTING_NOT_FOUND_OR_NO_PERMISSION, 
+                    actual=response.json()['message']
+                )
             )

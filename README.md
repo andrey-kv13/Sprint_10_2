@@ -6,19 +6,21 @@
 
 ```
 ├── config/
-│   ├── config.py           # Конфигурация API эндпоинтов
-│   └── error_messages.py   # Шаблоны сообщений для assert
+│   └── config.py           # Конфигурация API эндпоинтов
+├── data/
+│   ├── error_messages.py    # Шаблоны сообщений для assert
+│   └── response_messages.py # Ожидаемые сообщения в ответах API
 ├── helpers/
 │   ├── api_client.py       # Методы HTTP запросов
 │   ├── common_generator.py # Генератор случайных строк
 │   ├── listing_generator.py # Генератор тестовых данных объявлений
 │   └── user_generator.py   # Генератор тестовых данных пользователей
 ├── tests/
-│   ├── Listing/
+│   ├── listing/
 │   │   ├── test_create_create_listing.py
 │   │   ├── test_delete_listing.py
 │   │   └── test_edit_listing.py
-│   └── User/
+│   └── user/
 │       ├── test_user_login.py
 │       └── test_user_registration.py
 ├── allure-report/          # HTML отчёт Allure

@@ -1,7 +1,6 @@
 import allure
-from helpers.user_generator import UserGenerator
 from helpers.api_client import ApiClient
-from config.error_messages import AssertMessages
+from data.error_messages import AssertMessages
 
 
 @allure.suite("Авторизация")
@@ -11,16 +10,15 @@ class TestUserLogin:
     @allure.feature("Авторизация пользователя")
     @allure.title("Авторизация пользователя: позитивный кейс")
     @allure.description("Тест проверяет успешную авторизацию существующего пользователя")
-    def test_user_login(self):
-        with allure.step("Подготовить тестовые данные"):
-            payload = UserGenerator.register_new_user()
-        
+    def test_user_login(self, register_new_user):
         with allure.step("Отправить запрос на авторизацию пользователя"):
+            payload, _ = register_new_user
             response = ApiClient.post_request_login_user(payload)
         
         with allure.step("Проверить статус код ответа"):
             assert response.status_code == 201, (
-                AssertMessages.STATUS_CODE_MISMATCH.format(expected=201, actual=response.status_code)
+                AssertMessages.STATUS_CODE_MISMATCH.format(expected=201, actual=response.status_code) +
+                f" Response: {response.text}"
             )
         
         with allure.step("Проверить наличие access_token в ответе"):

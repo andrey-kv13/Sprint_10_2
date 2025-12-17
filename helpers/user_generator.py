@@ -1,4 +1,3 @@
-from helpers.api_client import ApiClient
 from helpers.common_generator import CommonGenerator
 
 
@@ -14,14 +13,3 @@ class UserGenerator:
             "password": password,
             "submitPassword": password
         }
-        
-    @staticmethod
-    def register_new_user():
-        """Регистрация нового пользователя в системе"""
-        payload = UserGenerator.generate_user_data()
-        response = ApiClient.post_request_create_user(payload)
-        
-        if response.status_code == 201:
-            return payload
-        else:
-            return None

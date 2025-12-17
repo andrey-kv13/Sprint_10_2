@@ -1,7 +1,7 @@
 import allure
 from helpers.user_generator import UserGenerator
 from helpers.api_client import ApiClient
-from config.error_messages import AssertMessages, ErrorMessages
+from data.error_messages import AssertMessages, ErrorMessages
 
 
 class TestUserRegistration:
@@ -37,7 +37,8 @@ class TestUserRegistration:
             
         with allure.step("Проверить статус код ответа"):
             assert response.status_code == 400, (
-                AssertMessages.STATUS_CODE_MISMATCH.format(expected=400, actual=response.status_code)
+                AssertMessages.STATUS_CODE_MISMATCH.format(expected=400, actual=response.status_code) +
+                f" Response: {response.text}"
             )
             
         with allure.step("Проверить сообщение об ошибке в ответе"):

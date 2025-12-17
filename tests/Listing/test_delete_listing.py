@@ -1,6 +1,7 @@
 import allure
 from helpers.api_client import ApiClient
-from config.error_messages import AssertMessages
+from data.error_messages import AssertMessages
+from data.response_messages import SuccessMessages
 
 
 class TestDeleteListing:
@@ -18,9 +19,13 @@ class TestDeleteListing:
         with allure.step("Проверить статус код ответа"):
             assert response.status_code == 200, (
                 AssertMessages.STATUS_CODE_MISMATCH.format(expected=200, actual=response.status_code)
+                + f" Response: {response.text}"
             )
         with allure.step("Проверить текст сообщения об успешном удалении"):
-            expected_message = "Объявление удалено успешно"
-            assert response.json()['message'] == expected_message, (
-                AssertMessages.ERROR_MESSAGE_MISMATCH.format(expected=expected_message, actual=response.json()['message'])
+            assert response.json()['message'] == SuccessMessages.LISTING_DELETED, (
+                AssertMessages.FIELD_VALUE_MISMATCH.format(
+                    field_name='message',
+                    expected=SuccessMessages.LISTING_DELETED,
+                    actual=response.json()['message']
+                )
             )
